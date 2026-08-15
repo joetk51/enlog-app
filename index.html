@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>縁ログ</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💞</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="app-header">
+    <h1>💞 縁ログ</h1>
+    <div id="header-count"></div>
+  </header>
+
+  <main id="view-container">
+
+    <!-- ホームタブ -->
+    <section id="view-home" class="view active">
+      <div class="card">
+        <h3>🎂 近い誕生日・記念日</h3>
+        <div id="upcoming-list" class="entry-list"></div>
+        <p class="hint" id="upcoming-empty-hint" hidden>直近60日以内の予定はありません。</p>
+      </div>
+      <div class="card">
+        <h3>🕓 最近更新した人</h3>
+        <div id="recent-list" class="entry-list"></div>
+        <p class="hint" id="recent-empty-hint" hidden>まだ誰も登録されていません。「一覧」タブから追加してください。</p>
+      </div>
+    </section>
+
+    <!-- 一覧タブ -->
+    <section id="view-list" class="view">
+      <div class="card">
+        <label>検索（名前・ふりがな・タグ・好み・趣味・メモ）
+          <input id="search-input" type="text" placeholder="例: 田中、たなか、大学、寿司、映画">
+        </label>
+        <div id="relation-filter" class="chip-filter"></div>
+      </div>
+      <button id="btn-add-person" class="btn-primary">＋ 人を追加</button>
+      <div id="people-list" class="entry-list"></div>
+      <p class="hint" id="people-empty-hint" hidden>該当する人がいません。</p>
+    </section>
+
+    <!-- 設定タブ -->
+    <section id="view-settings" class="view">
+      <div class="card">
+        <h3>データ管理</h3>
+        <p class="hint">データはこの端末のブラウザにのみ保存されます。機種変更やブラウザ変更の前にエクスポートしてください。写真を多く登録すると容量が大きくなるのでご注意ください。</p>
+        <div class="btn-row">
+          <button id="btn-export" class="btn-secondary">エクスポート</button>
+          <button id="btn-import" class="btn-secondary">インポート</button>
+        </div>
+        <input type="file" id="import-file" accept="application/json" hidden>
+        <button id="btn-clear" class="btn-danger">全データ削除</button>
+      </div>
+      <div class="card">
+        <h3>このアプリについて</h3>
+        <p class="hint">友人・恋人・家族など、大切な人との関係を記録するための個人用メモアプリです。誕生日や記念日、やりとりの記録を残せます。</p>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-view="home"><span class="tab-icon">🏠</span><span>ホーム</span></button>
+    <button class="tab-btn" data-view="list"><span class="tab-icon">👥</span><span>一覧</span></button>
+    <button class="tab-btn" data-view="settings"><span class="tab-icon">⚙️</span><span>設定</span></button>
+  </nav>
+
+  <!-- 人物詳細オーバーレイ -->
+  <div id="overlay-detail" class="overlay" hidden>
+    <header class="overlay-header">
+      <button id="btn-detail-back" class="icon-btn" aria-label="戻る">←</button>
+      <h2 id="detail-name">-</h2>
+      <div class="overlay-header-actions">
+        <button id="btn-detail-edit" class="icon-btn" aria-label="編集">✏️</button>
+        <button id="btn-detail-delete" class="icon-btn" aria-label="削除">🗑️</button>
+      </div>
+    </header>
+    <div class="overlay-body">
+      <div class="detail-top">
+        <img id="detail-photo" class="detail-photo" alt="">
+        <div class="detail-top-info">
+          <div id="detail-kana" class="hint"></div>
+          <span id="detail-relation" class="badge"></span>
+          <div id="detail-tags" class="chip-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎂 誕生日・記念日</h3>
+        <div id="detail-dates" class="date-list"></div>
+      </div>
+
+      <div class="card">
+        <h3>🍽️ 好み・趣味</h3>
+        <div class="sub-label">好きな食べ物</div>
+        <div id="detail-food-like" class="chip-list"></div>
+        <div class="sub-label">苦手な食べ物</div>
+        <div id="detail-food-dislike" class="chip-list"></div>
+        <div class="sub-label">趣味</div>
+        <div id="detail-hobbies" class="chip-list"></div>
+      </div>
+
+      <div class="card">
+        <h3>📝 メモ</h3>
+        <p id="detail-memo" class="memo-text"></p>
+      </div>
+
+      <div class="card">
+        <h3>💬 やりとり履歴</h3>
+        <div class="interaction-form">
+          <input type="date" id="interaction-date">
+          <textarea id="interaction-text" rows="2" placeholder="例: カフェで2時間くらい話した。転職の相談に乗った。"></textarea>
+          <button id="btn-add-interaction" class="btn-secondary">追加</button>
+        </div>
+        <div id="interaction-list" class="entry-list"></div>
+        <p class="hint" id="interaction-empty-hint" hidden>まだ記録がありません。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 追加・編集フォームオーバーレイ -->
+  <div id="overlay-form" class="overlay" hidden>
+    <header class="overlay-header">
+      <button id="btn-form-cancel" class="icon-btn" aria-label="戻る">←</button>
+      <h2 id="form-title">人を追加</h2>
+      <div class="overlay-header-actions"></div>
+    </header>
+    <div class="overlay-body">
+      <div class="card">
+        <div class="photo-drop" id="form-photo-label">
+          <img id="form-photo-preview" hidden alt="プレビュー">
+          <button id="btn-form-remove-photo" class="photo-remove" hidden aria-label="写真を取り消す">✕</button>
+          <div id="form-photo-placeholder">📷 写真を選択（任意）</div>
+        </div>
+        <div class="btn-row">
+          <input type="file" id="form-photo-camera" accept="image/*" capture="environment" hidden>
+          <label for="form-photo-camera" class="btn-secondary">📷 撮影する</label>
+          <input type="file" id="form-photo-gallery" accept="image/*" hidden>
+          <label for="form-photo-gallery" class="btn-secondary">🖼️ アルバムから選択</label>
+        </div>
+
+        <label>名前（必須）
+          <input id="f-name" type="text" placeholder="例: 山田 太郎">
+        </label>
+        <label>ふりがな
+          <input id="f-kana" type="text" placeholder="例: やまだ たろう">
+        </label>
+        <label>関係性
+          <select id="f-relation"></select>
+        </label>
+        <label id="f-relation-other-wrap" hidden>関係性の詳細（任意）
+          <input id="f-relation-other" type="text" placeholder="例: サークルの後輩">
+        </label>
+        <label>タグ（カンマ区切り）
+          <input id="f-tags" type="text" placeholder="例: 大学, 趣味友, 猫好き">
+        </label>
+        <label>誕生日
+          <input id="f-birthday" type="date">
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>記念日</h3>
+        <div id="form-anniversaries" class="repeatable-list"></div>
+        <div class="btn-row">
+          <input id="f-anniv-label" type="text" placeholder="例: 出会った日">
+          <input id="f-anniv-date" type="date">
+        </div>
+        <button id="btn-add-anniv" class="btn-secondary">＋ 記念日を追加</button>
+      </div>
+
+      <div class="card">
+        <h3>🍽️ 好み・趣味</h3>
+        <label>好きな食べ物（カンマ区切り）
+          <input id="f-food-like" type="text" placeholder="例: 寿司, ラーメン, 辛いもの">
+        </label>
+        <label>苦手な食べ物（カンマ区切り）
+          <input id="f-food-dislike" type="text" placeholder="例: パクチー, 貝類">
+        </label>
+        <label>趣味（カンマ区切り）
+          <input id="f-hobby" type="text" placeholder="例: 映画鑑賞, キャンプ, 猫">
+        </label>
+      </div>
+
+      <div class="card">
+        <label>メモ（性格・好み・話した話題など自由に）
+          <textarea id="f-memo" rows="5" placeholder="例: 猫が好き。辛い物が苦手。前職はエンジニア。"></textarea>
+        </label>
+      </div>
+
+      <button id="btn-save-person" class="btn-primary">✅ 保存する</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
