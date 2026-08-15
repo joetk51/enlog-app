@@ -206,7 +206,7 @@ function getFilteredPeople() {
     if (selectedRelationFilter !== 'all' && p.relation !== selectedRelationFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const hay = [p.name, p.kana, p.memo, ...(p.tags || []), ...(p.foodLike || []), ...(p.foodDislike || []), ...(p.hobbies || [])].join(' ').toLowerCase();
+      const hay = [p.name, p.kana, p.memo, ...(p.tags || []), ...(p.foodLike || []), ...(p.foodDislike || []), ...(p.hobbies || []), ...(p.allergies || []), ...(p.family || []), ...(p.friends || [])].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -361,6 +361,9 @@ function renderDetail(p) {
   renderChipList('#detail-food-like', p.foodLike);
   renderChipList('#detail-food-dislike', p.foodDislike);
   renderChipList('#detail-hobbies', p.hobbies);
+  renderChipList('#detail-allergies', p.allergies);
+  renderChipList('#detail-family', p.family);
+  renderChipList('#detail-friends', p.friends);
 
   $('#detail-memo').textContent = p.memo || '（メモはありません）';
 
@@ -467,6 +470,9 @@ function openForm(id) {
   $('#f-food-like').value = (p?.foodLike || []).join(', ');
   $('#f-food-dislike').value = (p?.foodDislike || []).join(', ');
   $('#f-hobby').value = (p?.hobbies || []).join(', ');
+  $('#f-allergy').value = (p?.allergies || []).join(', ');
+  $('#f-family').value = (p?.family || []).join(', ');
+  $('#f-friend').value = (p?.friends || []).join(', ');
   formAnniversaries = p ? [...(p.anniversaries || [])] : [];
   formPhotoDataUrl = p?.photo || null;
   $('#f-anniv-label').value = '';
@@ -557,19 +563,22 @@ $('#btn-save-person').addEventListener('click', () => {
   const foodLike = $('#f-food-like').value.split(',').map((t) => t.trim()).filter(Boolean);
   const foodDislike = $('#f-food-dislike').value.split(',').map((t) => t.trim()).filter(Boolean);
   const hobbies = $('#f-hobby').value.split(',').map((t) => t.trim()).filter(Boolean);
+  const allergies = $('#f-allergy').value.split(',').map((t) => t.trim()).filter(Boolean);
+  const family = $('#f-family').value.split(',').map((t) => t.trim()).filter(Boolean);
+  const friends = $('#f-friend').value.split(',').map((t) => t.trim()).filter(Boolean);
   const now = Date.now();
 
   if (editingPersonId) {
     const p = people.find((x) => x.id === editingPersonId);
     Object.assign(p, {
-      name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies,
+      name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies, family, friends,
       anniversaries: [...formAnniversaries],
       photo: formPhotoDataUrl,
       updatedAt: now,
     });
   } else {
     people.push({
-      id: uid(), name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies,
+      id: uid(), name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies, family, friends,
       anniversaries: [...formAnniversaries],
       photo: formPhotoDataUrl,
       interactions: [],

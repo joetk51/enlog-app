@@ -34,7 +34,7 @@
     <!-- 一覧タブ -->
     <section id="view-list" class="view">
       <div class="card">
-        <label>検索（名前・ふりがな・タグ・好み・趣味・メモ）
+        <label>検索（名前・ふりがな・タグ・好み・趣味・家族・友人・メモ）
           <input id="search-input" type="text" placeholder="例: 田中、たなか、大学、寿司、映画">
         </label>
         <div id="relation-filter" class="chip-filter"></div>
@@ -103,6 +103,16 @@
         <div id="detail-food-dislike" class="chip-list"></div>
         <div class="sub-label">趣味</div>
         <div id="detail-hobbies" class="chip-list"></div>
+        <div class="sub-label">⚠️ アレルギー</div>
+        <div id="detail-allergies" class="chip-list"></div>
+      </div>
+
+      <div class="card">
+        <h3>👪 家族・友人</h3>
+        <div class="sub-label">家族</div>
+        <div id="detail-family" class="chip-list"></div>
+        <div class="sub-label">友だち</div>
+        <div id="detail-friends" class="chip-list"></div>
       </div>
 
       <div class="card">
@@ -184,6 +194,19 @@
         </label>
         <label>趣味（カンマ区切り）
           <input id="f-hobby" type="text" placeholder="例: 映画鑑賞, キャンプ, 猫">
+        </label>
+        <label>⚠️ アレルギー（カンマ区切り）
+          <input id="f-allergy" type="text" placeholder="例: 卵, 甲殻類, 花粉">
+        </label>
+      </div>
+
+      <div class="card">
+        <h3>👪 家族・友人</h3>
+        <label>家族（カンマ区切り）
+          <input id="f-family" type="text" placeholder="例: 母(花子), 父(太郎), 妹">
+        </label>
+        <label>友だち（カンマ区切り）
+          <input id="f-friend" type="text" placeholder="例: 田中さん, 鈴木さん">
         </label>
       </div>
 
