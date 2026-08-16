@@ -9,6 +9,7 @@
   --danger: #e0473f;
   --radius: 14px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
 
   --rel-friend: #4f7cff;
   --rel-lover: #ff5d8f;
@@ -29,6 +30,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body {
   margin: 0;
@@ -51,7 +53,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 8px;
+  padding: calc(16px + var(--safe-top)) 16px 8px;
 }
 .app-header h1 { font-size: 1.15rem; margin: 0; }
 #header-count { color: var(--text-muted); font-size: 0.85rem; }
@@ -275,7 +277,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 10px;
+  padding: calc(14px + var(--safe-top)) 10px 14px;
   border-bottom: 1px solid var(--border);
   background: var(--card-bg);
   flex-shrink: 0;
