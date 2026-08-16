@@ -19,12 +19,12 @@ gitコマンド不要で、ブラウザだけで公開できます。
    - Public を選択
    - 「Create repository」をクリック
 2. 作成直後の画面にある「uploading an existing file」リンクをクリック
-3. このフォルダの中の `index.html`、`style.css`、`app.js` の3つのファイルを画面にドラッグ＆ドロップ
+3. このフォルダの中の `index.html`、`style.css`、`app.js`、`apple-touch-icon.png` の4つのファイルを画面にドラッグ＆ドロップ
    - `README.md` はアプリの動作に不要なのでアップロードしなくてOK（アップロードしても問題ありません）
 4. 下部の「Commit changes」をクリックしてアップロードを確定
 5. リポジトリの「Settings」タブ →左メニューの「Pages」→「Build and deployment」の Branch を `main` / `/(root)` に設定して「Save」
 6. 数十秒〜数分待つと、ページ上部に公開URL（`https://<ユーザー名>.github.io/<リポジトリ名>/`）が表示されます
-7. そのURLをiPhoneのSafariで開けば利用できます。Safariの共有ボタン→「ホーム画面に追加」をするとアプリのアイコンのように起動できます
+7. そのURLをiPhoneのSafariで開けば利用できます。Safariの共有ボタン→「ホーム画面に追加」をすると、💞アイコンでアプリのように起動できます（Safariのアドレスバーなどが表示されないフルスクリーン表示になります）
 
 ## 3. 使い方
 
