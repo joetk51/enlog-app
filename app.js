@@ -72,6 +72,32 @@ function renderChipList(sel, items) {
   });
 }
 
+function normalizePeople() {
+  people.forEach((p) => {
+    p.family = (p.family || []).map((item) => (typeof item === 'string' ? { id: uid(), name: item, note: '' } : item));
+    p.friends = (p.friends || []).map((item) => (typeof item === 'string' ? { id: uid(), name: item, note: '' } : item));
+  });
+}
+
+function renderNoteList(sel, items) {
+  const el = $(sel);
+  el.innerHTML = '';
+  if (!items || items.length === 0) {
+    el.innerHTML = '<p class="hint">登録されていません。</p>';
+    return;
+  }
+  items.forEach((it) => {
+    const div = document.createElement('div');
+    div.className = 'date-item';
+    div.innerHTML = `
+      <div>
+        <div class="date-item-label">${escapeHtml(it.name)}</div>
+        ${it.note ? `<div class="date-item-value">${escapeHtml(it.note)}</div>` : ''}
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
 function avatarPlaceholder(person) {
   const rel = RELATIONS.find((r) => r.key === person.relation) || RELATIONS[RELATIONS.length - 1];
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" rx="50" fill="#e5e7eb"/><text x="50" y="63" font-size="46" text-anchor="middle">${rel.icon}</text></svg>`;
@@ -206,7 +232,12 @@ function getFilteredPeople() {
     if (selectedRelationFilter !== 'all' && p.relation !== selectedRelationFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const hay = [p.name, p.kana, p.memo, ...(p.tags || []), ...(p.foodLike || []), ...(p.foodDislike || []), ...(p.hobbies || []), ...(p.allergies || []), ...(p.family || []), ...(p.friends || [])].join(' ').toLowerCase();
+      const hay = [
+        p.name, p.kana, p.memo,
+        ...(p.tags || []), ...(p.foodLike || []), ...(p.foodDislike || []), ...(p.hobbies || []), ...(p.allergies || []),
+        ...(p.family || []).map((f) => `${f.name} ${f.note || ''}`),
+        ...(p.friends || []).map((f) => `${f.name} ${f.note || ''}`),
+      ].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -362,8 +393,8 @@ function renderDetail(p) {
   renderChipList('#detail-food-dislike', p.foodDislike);
   renderChipList('#detail-hobbies', p.hobbies);
   renderChipList('#detail-allergies', p.allergies);
-  renderChipList('#detail-family', p.family);
-  renderChipList('#detail-friends', p.friends);
+  renderNoteList('#detail-family', p.family);
+  renderNoteList('#detail-friends', p.friends);
 
   $('#detail-memo').textContent = p.memo || '（メモはありません）';
 
@@ -438,6 +469,8 @@ $('#btn-add-interaction').addEventListener('click', () => {
 let editingPersonId = null;
 let formPhotoDataUrl = null;
 let formAnniversaries = [];
+let formFamily = [];
+let formFriends = [];
 
 function renderRelationSelect() {
   const el = $('#f-relation');
@@ -471,14 +504,20 @@ function openForm(id) {
   $('#f-food-dislike').value = (p?.foodDislike || []).join(', ');
   $('#f-hobby').value = (p?.hobbies || []).join(', ');
   $('#f-allergy').value = (p?.allergies || []).join(', ');
-  $('#f-family').value = (p?.family || []).join(', ');
-  $('#f-friend').value = (p?.friends || []).join(', ');
   formAnniversaries = p ? [...(p.anniversaries || [])] : [];
+  formFamily = p ? [...(p.family || [])] : [];
+  formFriends = p ? [...(p.friends || [])] : [];
   formPhotoDataUrl = p?.photo || null;
   $('#f-anniv-label').value = '';
   $('#f-anniv-date').value = '';
+  $('#f-family-name').value = '';
+  $('#f-family-note').value = '';
+  $('#f-friend-name').value = '';
+  $('#f-friend-note').value = '';
   updateFormPhotoPreview();
   renderFormAnniversaries();
+  renderFormFamily();
+  renderFormFriends();
   openOverlay('overlay-form');
 }
 
@@ -550,6 +589,68 @@ function renderFormAnniversaries() {
   });
 }
 
+// 家族
+$('#btn-add-family').addEventListener('click', () => {
+  const name = $('#f-family-name').value.trim();
+  const note = $('#f-family-note').value.trim();
+  if (!name) { toast('名前を入力してください'); return; }
+  formFamily.push({ id: uid(), name, note });
+  $('#f-family-name').value = '';
+  $('#f-family-note').value = '';
+  renderFormFamily();
+});
+function renderFormFamily() {
+  const el = $('#form-family');
+  el.innerHTML = '';
+  if (formFamily.length === 0) {
+    el.innerHTML = '<p class="hint">まだ追加されていません。</p>';
+    return;
+  }
+  formFamily.forEach((f) => {
+    const div = document.createElement('div');
+    div.className = 'repeatable-item';
+    div.innerHTML = `<span>${escapeHtml(f.name)}${f.note ? `: ${escapeHtml(f.note)}` : ''}</span><button type="button" class="repeatable-del" data-id="${f.id}" aria-label="削除">✕</button>`;
+    el.appendChild(div);
+  });
+  el.querySelectorAll('.repeatable-del').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formFamily = formFamily.filter((x) => x.id !== btn.dataset.id);
+      renderFormFamily();
+    });
+  });
+}
+
+// 友だち
+$('#btn-add-friend').addEventListener('click', () => {
+  const name = $('#f-friend-name').value.trim();
+  const note = $('#f-friend-note').value.trim();
+  if (!name) { toast('名前を入力してください'); return; }
+  formFriends.push({ id: uid(), name, note });
+  $('#f-friend-name').value = '';
+  $('#f-friend-note').value = '';
+  renderFormFriends();
+});
+function renderFormFriends() {
+  const el = $('#form-friends');
+  el.innerHTML = '';
+  if (formFriends.length === 0) {
+    el.innerHTML = '<p class="hint">まだ追加されていません。</p>';
+    return;
+  }
+  formFriends.forEach((f) => {
+    const div = document.createElement('div');
+    div.className = 'repeatable-item';
+    div.innerHTML = `<span>${escapeHtml(f.name)}${f.note ? `: ${escapeHtml(f.note)}` : ''}</span><button type="button" class="repeatable-del" data-id="${f.id}" aria-label="削除">✕</button>`;
+    el.appendChild(div);
+  });
+  el.querySelectorAll('.repeatable-del').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      formFriends = formFriends.filter((x) => x.id !== btn.dataset.id);
+      renderFormFriends();
+    });
+  });
+}
+
 // 保存
 $('#btn-save-person').addEventListener('click', () => {
   const name = $('#f-name').value.trim();
@@ -564,22 +665,24 @@ $('#btn-save-person').addEventListener('click', () => {
   const foodDislike = $('#f-food-dislike').value.split(',').map((t) => t.trim()).filter(Boolean);
   const hobbies = $('#f-hobby').value.split(',').map((t) => t.trim()).filter(Boolean);
   const allergies = $('#f-allergy').value.split(',').map((t) => t.trim()).filter(Boolean);
-  const family = $('#f-family').value.split(',').map((t) => t.trim()).filter(Boolean);
-  const friends = $('#f-friend').value.split(',').map((t) => t.trim()).filter(Boolean);
   const now = Date.now();
 
   if (editingPersonId) {
     const p = people.find((x) => x.id === editingPersonId);
     Object.assign(p, {
-      name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies, family, friends,
+      name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies,
       anniversaries: [...formAnniversaries],
+      family: [...formFamily],
+      friends: [...formFriends],
       photo: formPhotoDataUrl,
       updatedAt: now,
     });
   } else {
     people.push({
-      id: uid(), name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies, family, friends,
+      id: uid(), name, kana, relation, relationOther, tags, birthday, memo, foodLike, foodDislike, hobbies, allergies,
       anniversaries: [...formAnniversaries],
+      family: [...formFamily],
+      friends: [...formFriends],
       photo: formPhotoDataUrl,
       interactions: [],
       createdAt: now,
@@ -635,6 +738,7 @@ $('#btn-clear').addEventListener('click', () => {
 });
 
 // ---------- 初期化 ----------
+normalizePeople();
 renderRelationSelect();
 renderRelationFilterChips();
 renderAll();

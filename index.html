@@ -110,9 +110,9 @@
       <div class="card">
         <h3>👪 家族・友人</h3>
         <div class="sub-label">家族</div>
-        <div id="detail-family" class="chip-list"></div>
+        <div id="detail-family" class="date-list"></div>
         <div class="sub-label">友だち</div>
-        <div id="detail-friends" class="chip-list"></div>
+        <div id="detail-friends" class="date-list"></div>
       </div>
 
       <div class="card">
@@ -201,13 +201,23 @@
       </div>
 
       <div class="card">
-        <h3>👪 家族・友人</h3>
-        <label>家族（カンマ区切り）
-          <input id="f-family" type="text" placeholder="例: 母(花子), 父(太郎), 妹">
-        </label>
-        <label>友だち（カンマ区切り）
-          <input id="f-friend" type="text" placeholder="例: 田中さん, 鈴木さん">
-        </label>
+        <h3>👪 家族</h3>
+        <div id="form-family" class="repeatable-list"></div>
+        <div class="btn-row">
+          <input id="f-family-name" type="text" placeholder="例: 母">
+          <input id="f-family-note" type="text" placeholder="例: 建設業の事務職をしている">
+        </div>
+        <button id="btn-add-family" class="btn-secondary">＋ 家族を追加</button>
+      </div>
+
+      <div class="card">
+        <h3>👥 友だち</h3>
+        <div id="form-friends" class="repeatable-list"></div>
+        <div class="btn-row">
+          <input id="f-friend-name" type="text" placeholder="例: 田中さん">
+          <input id="f-friend-note" type="text" placeholder="例: ゴルフが趣味">
+        </div>
+        <button id="btn-add-friend" class="btn-secondary">＋ 友だちを追加</button>
       </div>
 
       <div class="card">
